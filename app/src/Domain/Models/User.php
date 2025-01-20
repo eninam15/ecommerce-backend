@@ -31,4 +31,15 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
+
+    public function productsCreated()
+    {
+        return $this->hasMany(Product::class, 'created_by');
+    }
+
+    public function productsUpdated()
+    {
+        return $this->hasMany(Product::class, 'updated_by');
+    }
+
 }
