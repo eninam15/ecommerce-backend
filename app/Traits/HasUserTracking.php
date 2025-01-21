@@ -3,7 +3,7 @@
 
 namespace App\Traits;
 
-use App\src\Domain\Models\User;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 trait HasUserTracking

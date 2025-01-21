@@ -1,6 +1,5 @@
 <?php
-// app/Models/Role.php
-namespace App\src\Domain\Models;
+namespace App\Models;
 
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Spatie\Permission\Models\Role as SpatieRole;

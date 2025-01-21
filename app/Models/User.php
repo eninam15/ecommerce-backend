@@ -1,6 +1,6 @@
 <?php
 
-namespace App\src\Domain\Models;
+namespace App\Models;
 
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Foundation\Auth\User as Authenticatable;

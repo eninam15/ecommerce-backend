@@ -1,6 +1,6 @@
 <?php
 
-namespace App\src\Domain\Models;
+namespace App\Models;
 
 use App\Traits\HasUserTracking;
 use Illuminate\Database\Eloquent\Factories\HasFactory;

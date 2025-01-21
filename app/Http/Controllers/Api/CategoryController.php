@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Presentation\Controllers;
+namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\CategoryRequest;
+use App\Http\Requests\Category\CategoryRequest;
 use App\Http\Resources\CategoryResource;
-use App\src\Domain\Models\Category;
+use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 

@@ -1,6 +1,5 @@
 <?php
-// app/Models/Permission.php
-namespace App\src\Domain\Models;
+namespace App\Models;
 
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Spatie\Permission\Models\Permission as SpatiePermission;
