@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\src\Domain\Models\User;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Controllers\Controller;
@@ -27,7 +27,7 @@ class AuthController extends Controller
                 'password' => Hash::make($request->password),
             ]);
 
-            $user->assignRole('user');
+            $user->assignRole('admin');
 
             $uuidToken = (string) Str::uuid(); // Crear un token UUID
 

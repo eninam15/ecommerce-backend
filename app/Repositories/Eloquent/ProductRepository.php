@@ -17,9 +17,9 @@ class ProductRepository implements ProductRepositoryInterface
         return $this->model->with('category')->get();
     }
 
-    public function create(ProductData $data)
+    public function create(ProductData $data, string $userId)
     {
-        return DB::transaction(function () use ($data) {
+        return DB::transaction(function () use ($data, $userId) {
             $product = $this->model->create([
                 'name' => $data->name,
                 'slug' => Str::slug($data->name),
@@ -29,6 +29,8 @@ class ProductRepository implements ProductRepositoryInterface
                 'category_id' => $data->category_id,
                 'status' => $data->status,
                 'attributes' => $data->attributes,
+                'created_by' => $userId,
+                'updated_by' => $userId,
             ]);
 
             // Manejar las imágenes
@@ -41,6 +43,8 @@ class ProductRepository implements ProductRepositoryInterface
                         'path' => $path,
                         'is_primary' => $data->primary_image === $index,
                         'order' => $index,
+                        'created_by' => $userId,
+                        'updated_by' => $userId,
                     ]);
                 }
             }
@@ -91,12 +95,18 @@ class ProductRepository implements ProductRepositoryInterface
         return $this->model->where('category_id', $categoryId)->with('category')->get();
     }
 
-    public function updateStock(string $id, int $quantity)
+    public function reserveStock(string $productId, int $quantity)
     {
-        $product = $this->model->findOrFail($id);
-        $product->stock = $quantity;
+        $product = $this->model->findOrFail($productId);
+
+        if ($product->stock < $quantity) {
+            throw new \Exception('Insufficient stock');
+        }
+
+        $product->stock -= $quantity;
         $product->save();
 
         return $product;
     }
+
 }

@@ -51,7 +51,7 @@ class ProductController extends Controller
     public function store(ProductRequest $request)
     {
         $product = $this->productService->createProduct(
-            ProductData::fromRequest($request)
+            ProductData::fromRequest($request), '9e0a4d30-c294-4141-8c8f-dd77bd5a2466'
         );
 
         return new ProductResource($product->load(['category', 'images', 'created_by', 'updated_by']));

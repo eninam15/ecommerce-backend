@@ -1,7 +1,7 @@
 <?php
 namespace App\Services;
 
-use App\DTOs\ProductData;
+use App\Dtos\ProductData;
 use App\Repositories\Interfaces\ProductRepositoryInterface;
 
 class ProductService
@@ -18,9 +18,9 @@ class ProductService
         return $this->productRepository->all();
     }
 
-    public function createProduct(ProductData $data)
+    public function createProduct(ProductData $data, string $userId)
     {
-        return $this->productRepository->create($data);
+        return $this->productRepository->create($data, $userId);
     }
 
     public function updateProduct(string $id, ProductData $data)
@@ -37,4 +37,10 @@ class ProductService
     {
         return $this->productRepository->find($id);
     }
+
+    public function reserveStock(string $id, int $quantity)
+    {
+        return $this->productRepository->reserveStock($id, $quantity);
+    }
+
 }

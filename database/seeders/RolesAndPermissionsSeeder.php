@@ -3,8 +3,8 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use App\src\Domain\Models\Role;
-use App\src\Domain\Models\Permission;
+use App\Models\Role;
+use App\Models\Permission;
 
 class RolesAndPermissionsSeeder extends Seeder
 {
@@ -18,10 +18,10 @@ class RolesAndPermissionsSeeder extends Seeder
         Permission::create(['name' => 'read users', 'guard_name' => 'api']);
         Permission::create(['name' => 'update users', 'guard_name' => 'api']);
         Permission::create(['name' => 'delete users', 'guard_name' => 'api']);
-        
+
         $adminRole = Role::create(['name' => 'admin', 'guard_name' => 'api']);
         $adminRole->givePermissionTo(Permission::all());
-        
+
         $userRole = Role::create(['name' => 'user', 'guard_name' => 'api']);
         $userRole->givePermissionTo(['read users']);
     }
