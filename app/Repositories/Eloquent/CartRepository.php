@@ -48,16 +48,29 @@ class CartRepository implements CartRepositoryInterface
         return $cart->load('items.product');
     }
 
-    public function updateItemQuantity(string $cartId, string $productId, int $quantity)
+    public function updateItemQuantity(string $cartId, string $productId, int $quantity, string $operation)
     {
         $cart = $this->cart->findOrFail($cartId);
         $cartItem = $cart->items()->where('product_id', $productId)->firstOrFail();
 
-        if ($quantity <= 0) {
-            $cartItem->delete();
-        } else {
-            $cartItem->update(['quantity' => $quantity]);
+        switch ($operation) {
+            case 'add':
+                $cartItem->quantity += $quantity;
+                break;
+            case 'subtract':
+                $cartItem->quantity -= $quantity;
+                if ($cartItem->quantity < 1) {
+                    $cartItem->delete();
+                    //return response()->json(['message' => 'Producto eliminado del carrito'], 200);
+                }
+                break;
+            case 'replace':
+            default:
+                $cartItem->quantity = $quantity;
+                break;
         }
+
+        $cartItem->save();
 
         $this->updateCartTotal($cart);
 

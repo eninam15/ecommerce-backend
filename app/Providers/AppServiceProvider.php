@@ -15,6 +15,8 @@ use App\Repositories\Interfaces\ShippingAddressRepositoryInterface;
 use App\Repositories\Eloquent\ShippingAddressRepository;
 use App\Repositories\Interfaces\PaymentRepositoryInterface;
 use App\Repositories\Eloquent\PaymentRepository;
+use App\Repositories\Interfaces\BannerRepositoryInterface;
+use App\Repositories\Eloquent\BannerRepository;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -28,6 +30,8 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(OrderRepositoryInterface::class, OrderRepository::class);
         $this->app->bind(ShippingAddressRepositoryInterface::class, ShippingAddressRepository::class);
         $this->app->bind(PaymentRepositoryInterface::class, PaymentRepository::class);
+        $this->app->bind(BannerRepositoryInterface::class, BannerRepository::class);
+
     }
 
     /**

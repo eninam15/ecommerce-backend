@@ -36,10 +36,10 @@ class CartService
         }
     }
 
-    public function updateQuantity(string $userId, string $productId, int $quantity)
+    public function updateQuantity(string $userId, string $productId, int $quantity, string $operation)
     {
         $cart = $this->getOrCreateCart($userId);
-        return $this->cartRepository->updateItemQuantity($cart->id, $productId, $quantity);
+        return $this->cartRepository->updateItemQuantity($cart->id, $productId, $quantity, $operation);
     }
 
     public function removeFromCart(string $userId, string $productId)

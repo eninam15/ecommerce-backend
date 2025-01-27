@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use App\Services\CartService;
 use App\Http\Requests\Cart\AddToCartRequest;
+use App\Http\Requests\Cart\UpdateCartItemRequest;
 use App\Dtos\CartItemData;
 
 
@@ -18,7 +19,7 @@ class CartController extends Controller
         protected CartService $cartService
     ) {}
 
-    public function show()
+    public function getOrCreateCart()
     {
         $cart = $this->cartService->getOrCreateCart(auth()->id());
         return new CartResource(
@@ -30,7 +31,7 @@ class CartController extends Controller
         );
     }
 
-    public function addItem(AddToCartRequest $request)
+    public function addItemtoCart(AddToCartRequest $request)
     {
         if (!auth()->check()) {
             return response()->json([
@@ -47,12 +48,13 @@ class CartController extends Controller
     }
 
 
-    public function updateQuantity(UpdateCartItemRequest $request, string $productId)
+    public function updateQuantityItemCart(UpdateCartItemRequest $request, string $productId)
     {
         $cart = $this->cartService->updateQuantity(
             auth()->id(),
             $productId,
-            $request->quantity
+            $request->quantity,
+            $request->operation
         );
         return new CartResource($cart->load('items.product'));
     }

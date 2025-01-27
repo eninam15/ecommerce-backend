@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\ShippingAddressController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\PaymentController;
+use App\Http\Controllers\Api\BannerController;
 
 
 use Illuminate\Support\Facades\Route;
@@ -16,9 +17,10 @@ Route::prefix('v1')->group(function () {
     Route::middleware(['auth:sanctum'])->group(function () {
         // Rutas que requieren autenticación
 
-        Route::get('/cart', [CartController::class, 'show']);
-        Route::post('cart/items', [CartController::class, 'addItem']);
-        Route::patch('cart/items/{productId}', [CartController::class, 'updateQuantity']);
+
+        Route::get('/cart', [CartController::class, 'getOrCreateCart']);
+        Route::post('cart/items', [CartController::class, 'addItemtoCart']);
+        Route::put('/cart/{productId}/update', [CartController::class, 'updateQuantityItemCart']);
         Route::delete('cart/items/{productId}', [CartController::class, 'removeItem']);
         Route::delete('cart', [CartController::class, 'clear']);
 
@@ -46,6 +48,8 @@ Route::prefix('v1')->group(function () {
 
     Route::post('/register', [AuthController::class, 'register']);
     Route::post('/login', [AuthController::class, 'login']);
+    Route::apiResource('banners', BannerController::class);
+
 
     Route::apiResource('/categories', CategoryController::class);
     Route::apiResource('/products', ProductController::class);
