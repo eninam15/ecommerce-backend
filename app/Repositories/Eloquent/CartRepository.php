@@ -28,16 +28,16 @@ class CartRepository implements CartRepositoryInterface
         $cart = $this->cart->findOrFail($cartId);
         $product = $this->product->findOrFail($data->product_id);
 
-        $existingItem = $cart->items()
+        $cartItem = $cart->items()
             ->where('product_id', $data->product_id)
             ->first();
 
-        if ($existingItem) {
-            $existingItem->update([
-                'quantity' => $existingItem->quantity + $data->quantity
+        if ($cartItem) {
+            $cartItem->update([
+                'quantity' => $cartItem->quantity + $data->quantity
             ]);
         } else {
-            $cart->items()->create([
+            $cartItem = $cart->items()->create([
                 'product_id' => $data->product_id,
                 'quantity' => $data->quantity,
                 'price' => $product->price
@@ -45,7 +45,7 @@ class CartRepository implements CartRepositoryInterface
         }
 
         $this->updateCartTotal($cart);
-        return $cart->load('items.product');
+        return $cartItem->load('product');
     }
 
     public function updateItemQuantity(string $cartId, string $productId, int $quantity, string $operation)
@@ -74,7 +74,7 @@ class CartRepository implements CartRepositoryInterface
 
         $this->updateCartTotal($cart);
 
-        return $cart->load('items.product');
+        return $cartItem->load('product');
     }
 
     public function removeItem(string $cartId, string $productId)

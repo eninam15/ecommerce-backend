@@ -81,11 +81,11 @@ class AuthController extends Controller
             ]);
         }
 
-        $uuidToken = (string) Str::uuid(); // Crear un token UUID
+        $uuidToken = (string) Str::uuid();
 
         $user->tokens()->create([
             'name' => 'auth_token',
-            'token' => hash('sha256', $uuidToken), // Hash de UUID
+            'token' => hash('sha256', $uuidToken),
             'abilities' => ['*']
         ]);
 

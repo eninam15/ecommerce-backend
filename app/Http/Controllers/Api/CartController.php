@@ -3,6 +3,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Product\ProductRequest;
+use App\Http\Resources\CartItemResource;
 use App\Http\Resources\CartResource;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -39,24 +40,31 @@ class CartController extends Controller
             ], 401);
         }
 
-        $cart = $this->cartService->addToCart(
+        $cartItem = $this->cartService->addToCart(
             auth()->id(),
             CartItemData::fromRequest($request)
         );
 
-        return new CartResource($cart->load('items.product'));
+        return new CartItemResource($cartItem->load([
+            'product' => function ($query) {
+                $query->with(['category', 'images']);
+            }
+        ]));
     }
-
 
     public function updateQuantityItemCart(UpdateCartItemRequest $request, string $productId)
     {
-        $cart = $this->cartService->updateQuantity(
+        $cartItem = $this->cartService->updateQuantity(
             auth()->id(),
             $productId,
             $request->quantity,
             $request->operation
         );
-        return new CartResource($cart->load('items.product'));
+        return new CartItemResource($cartItem->load([
+            'product' => function ($query) {
+                $query->with(['category', 'images']);
+            }
+        ]));
     }
 
     public function removeItem(string $productId)
