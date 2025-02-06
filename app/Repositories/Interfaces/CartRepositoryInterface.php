@@ -5,6 +5,7 @@ use App\Dtos\CartItemData;
 
 interface CartRepositoryInterface
 {
+    public function getCartProductIds(string $userId);
     public function getOrCreateCart(string $userId);
     public function addItem(string $cartId, CartItemData $data);
     public function updateItemQuantity(string $cartId, string $productId, int $quantity , string $operation);

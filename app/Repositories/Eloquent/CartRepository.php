@@ -4,6 +4,7 @@ namespace App\Repositories\Eloquent;
 use Illuminate\Support\Facades\DB;
 use App\Models\Product;
 use App\Models\Cart;
+use App\Models\CartItem;
 use App\Repositories\Interfaces\CartRepositoryInterface;
 use App\Dtos\CartItemData;
 use Illuminate\Support\Str;
@@ -12,7 +13,8 @@ class CartRepository implements CartRepositoryInterface
 {
     public function __construct(
         protected Cart $cart,
-        protected Product $product
+        protected Product $product,
+        protected CartItem $cartItem
     ) {}
 
     public function getOrCreateCart(string $userId)
@@ -21,6 +23,15 @@ class CartRepository implements CartRepositoryInterface
             ['user_id' => $userId],
             ['total' => 0]
         );
+    }
+
+    public function getCartProductIds(string $userId)
+    {
+        return $this->cartItem
+            ->whereHas('cart', function ($query) use ($userId) {
+                $query->where('user_id', $userId);
+            })
+            ->pluck('product_id');
     }
 
     public function addItem(string $cartId, CartItemData $data)

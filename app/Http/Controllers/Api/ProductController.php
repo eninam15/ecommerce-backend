@@ -12,6 +12,8 @@ use App\Services\ProductService;
 use App\Models\ProductImage;
 use App\Models\Product;
 use App\Dtos\ProductData;
+use App\Dtos\ProductFilterData;
+use App\Enums\ProductSortEnum;
 
 class ProductController extends Controller
 {
@@ -25,28 +27,22 @@ class ProductController extends Controller
 
     public function index(Request $request)
     {
-        $products = Product::query()
-            ->when($request->search, function ($query, $search) {
-                $query->where('name', 'like', "%{$search}%")
-                    ->orWhere('description', 'like', "%{$search}%");
-            })
-            ->when($request->category_id, function ($query, $categoryId) {
-                $query->where('category_id', $categoryId);
-            })
-            ->when($request->status !== null, function ($query) use ($request) {
-                $query->where('status', $request->boolean('status'));
-            })
-            ->when($request->min_price, function ($query, $price) {
-                $query->where('price', '>=', $price);
-            })
-            ->when($request->max_price, function ($query, $price) {
-                $query->where('price', '<=', $price);
-            })
-            ->with(['category', 'images', 'creator', 'updater'])
-            ->paginate($request->per_page ?? 100);
+        $filters = new ProductFilterData(
+            search: $request->search,
+            categoryIds: $request->category_ids ? explode(',', $request->category_ids) : null,
+            status: $request->boolean('status'),
+            minPrice: $request->min_price,
+            maxPrice: $request->max_price,
+            sortBy: $request->sort ? ProductSortEnum::tryFrom($request->sort) : null,
+            onPromotion: $request->boolean('on_promotion'),
+            perPage: $request->per_page ?? 100
+        );
+
+        $products = $this->productService->listProducts($filters, auth()->id());
 
         return ProductResource::collection($products);
     }
+
 
     public function store(ProductRequest $request)
     {

@@ -17,6 +17,18 @@ class CartService
         return $this->cartRepository->getOrCreateCart($userId);
     }
 
+    public function getCartProductIds(string $userId)
+    {
+        dd("Entering listProducts", $userId);
+        //$cartItemProductIds = $this->cartService->getCartProductIds($userId);
+    }
+
+
+    /*public function getCartProductIds(string $userId)
+    {
+        return $this->cartRepository->getCartProductIds($userId);
+    }*/
+
     public function addToCart(string $userId, CartItemData $data)
     {
         DB::beginTransaction();

@@ -3,10 +3,13 @@
 namespace App\Repositories\Eloquent;
 
 use Illuminate\Support\Facades\DB;
+use Illuminate\Pagination\LengthAwarePaginator;
 use App\Models\Product;
 use App\Repositories\Interfaces\ProductRepositoryInterface;
-use App\DTOs\ProductData;
+use App\Dtos\ProductData;
+use App\Dtos\ProductCartMarkingData;
 use Illuminate\Support\Str;
+use App\Enums\ProductSortEnum;
 
 class ProductRepository implements ProductRepositoryInterface
 {
@@ -15,6 +18,85 @@ class ProductRepository implements ProductRepositoryInterface
     public function all()
     {
         return $this->model->with('category')->get();
+    }
+
+    public function findByCriteria(
+        array $criteria,
+        ?ProductSortEnum $sortBy,
+        ?ProductCartMarkingData $cartMarking = null,
+        int $perPage = 100
+    ): LengthAwarePaginator {
+
+        $query = $this->model->query()
+            ->when($criteria['search'] ?? null, function ($query, $search) {
+                $query->where(function ($q) use ($search) {
+                    $q->whereRaw('LOWER(name) LIKE ?', ["%".strtolower($search)."%"])
+                    ->orWhereRaw('LOWER(description) LIKE ?', ["%".strtolower($search)."%"]);
+                });
+            })
+            ->when($criteria['category_ids'] ?? null, function ($query, $categoryIds) {
+                $query->whereIn('category_id', $categoryIds);
+            })
+            ->when($criteria['status'] ?? null, function ($query, $status) {
+                $query->where('status', $status);
+            })
+            ->when($criteria['min_price'] ?? null, function ($query, $price) {
+                $query->where('price', '>=', $price);
+            })
+            ->when($criteria['max_price'] ?? null, function ($query, $price) {
+                $query->where('price', '<=', $price);
+            })
+            ->when($cartMarking?->userId && $cartMarking?->cartItemProductIds,
+                function ($query) use ($cartMarking) {
+                    $query->addSelect([
+                        '*',
+                        'in_cart' => function ($subQuery) use ($cartMarking) {
+                            $subQuery->select(
+                                DB::raw('EXISTS (
+                                    SELECT 1
+                                    FROM cart_items
+                                    JOIN carts ON cart_items.cart_id = carts.id
+                                    WHERE cart_items.product_id = products.id
+                                    AND carts.user_id = ?
+                                ) as in_cart')
+                            )->addBinding($cartMarking->userId);
+                        },
+                        'cart_quantity' => function ($subQuery) use ($cartMarking) {
+                            $subQuery->select(
+                                DB::raw('(
+                                    SELECT COALESCE(SUM(cart_items.quantity), 0)
+                                    FROM cart_items
+                                    JOIN carts ON cart_items.cart_id = carts.id
+                                    WHERE cart_items.product_id = products.id
+                                    AND carts.user_id = ?
+                                ) as cart_quantity')
+                            )->addBinding($cartMarking->userId);
+                        }
+                    ]);
+                }
+            );
+            /*->when($criteria['on_promotion'] ?? false, function ($query) {
+                $query->whereHas('promotions', function ($q) {
+                    $q->active(); // Assumes a scope in Promotion model
+                });
+            });*/
+
+        // Sorting logic
+        match ($sortBy) {
+            ProductSortEnum::MOST_SOLD => $query->orderByDesc('total_sales'),
+            ProductSortEnum::LATEST => $query->orderByDesc('created_at'),
+            ProductSortEnum::PRICE_ASC => $query->orderBy('price'),
+            ProductSortEnum::PRICE_DESC => $query->orderByDesc('price'),
+            ProductSortEnum::MOST_RATED => $query->orderByDesc('average_rating'),
+            /*ProductSortEnum::PROMOTION => $query->whereHas('promotions', function ($q) {
+                $q->active()->orderByDesc('discount_percentage');
+            }),*/
+            default => $query
+        };
+
+        return $query
+            ->with(['category', 'images'])
+            ->paginate($perPage);
     }
 
     public function create(ProductData $data, string $userId)

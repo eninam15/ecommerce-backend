@@ -19,6 +19,14 @@ class ProductResource extends JsonResource
             'status' => $this->status,
             'attributes' => $this->attributes,
             'images' => ProductImageResource::collection($this->whenLoaded('images')),
+            'in_cart' => $this->when(
+                isset($this->in_cart),
+                (bool) $this->in_cart
+            ),
+            'cart_quantity' => $this->when(
+                isset($this->cart_quantity),
+                (int) $this->cart_quantity
+            ),
             'created_by' => new UserResource($this->whenLoaded('creator')),
             'updated_by' => new UserResource($this->whenLoaded('updater')),
             'created_at' => $this->created_at,
