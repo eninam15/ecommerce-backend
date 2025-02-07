@@ -2,12 +2,12 @@
 namespace App\Repositories\Eloquent;
 
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use App\Models\Product;
 use App\Models\Cart;
 use App\Models\CartItem;
 use App\Repositories\Interfaces\CartRepositoryInterface;
 use App\Dtos\CartItemData;
-use Illuminate\Support\Str;
 
 class CartRepository implements CartRepositoryInterface
 {

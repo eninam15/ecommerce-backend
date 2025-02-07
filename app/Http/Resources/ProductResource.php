@@ -27,6 +27,12 @@ class ProductResource extends JsonResource
                 isset($this->cart_quantity),
                 (int) $this->cart_quantity
             ),
+            'related_products' => ProductResource::collection($this->whenLoaded('relatedProducts')),
+            'blogs' => BlogResource::collection($this->whenLoaded('blogs')),
+            'reviews' => ReviewResource::collection($this->whenLoaded('reviews')),
+            'average_rating' => $this->when($this->reviews_count > 0, $this->average_rating),
+            'reviews_count' => $this->when($this->reviews_count > 0, $this->reviews_count),
+            'active_promotions' => PromotionResource::collection($this->whenLoaded('activePromotions')),
             'created_by' => new UserResource($this->whenLoaded('creator')),
             'updated_by' => new UserResource($this->whenLoaded('updater')),
             'created_at' => $this->created_at,

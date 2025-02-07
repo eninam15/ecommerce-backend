@@ -34,6 +34,25 @@ Route::prefix('v1')->group(function () {
         Route::post('orders/{order}/payments', [PaymentController::class, 'initiate']);
         Route::post('payments/{payment}/confirm', [PaymentController::class, 'confirm']);
 
+          // Blogs
+        Route::apiResource('blogs', BlogController::class);
+        Route::get('products/{product}/blogs', [BlogController::class, 'productBlogs']);
+
+        // Reviews
+        Route::post('reviews', [ReviewController::class, 'store']);
+        Route::put('reviews/{review}', [ReviewController::class, 'update']);
+        Route::get('products/{product}/reviews', [ReviewController::class, 'productReviews']);
+
+        // Promotions
+        Route::apiResource('promotions', PromotionController::class);
+        Route::get('active-promotions', [PromotionController::class, 'getActivePromotions']);
+        Route::get('products/{product}/promotions', [PromotionController::class, 'getProductPromotions']);
+
+        // Related Products
+        Route::post('related-products', [RelatedProductController::class, 'store']);
+        Route::delete('products/{product}/related/{relatedProduct}', [RelatedProductController::class, 'destroy']);
+        Route::get('products/{product}/related', [RelatedProductController::class, 'getRelatedProducts']);
+
         Route::middleware(['role:admin'])->group(function () {
             // Rutas solo para administradores
         });
