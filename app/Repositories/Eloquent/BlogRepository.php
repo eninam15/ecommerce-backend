@@ -3,19 +3,22 @@ namespace App\Repositories\Eloquent;
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use App\Repositories\Interfaces\BlogRepositoryInterface;
+use App\Models\Blog;
+use App\Dtos\BlogData;
 
 class BlogRepository implements BlogRepositoryInterface
 {
-    public function __construct(protected Blog $model) {}
+    public function __construct(protected Blog $blog) {}
 
-    public function findById(string $id): ?Blog
+    public function findById(string $id)
     {
-        return $this->model->with(['products'])->find($id);
+        return $this->blog->with(['products'])->find($id);
     }
 
-    public function create(BlogData $data): Blog
+    public function create(BlogData $data)
     {
-        $blog = $this->model->create([
+        $blog = $this->blog->create([
             'title' => $data->title,
             'content' => $data->content,
             'status' => $data->status,
@@ -24,11 +27,11 @@ class BlogRepository implements BlogRepositoryInterface
         ]);
 
         $blog->products()->attach($data->productIds);
-        
+
         return $blog->load('products');
     }
 
-    public function update(string $id, BlogData $data): ?Blog
+    public function update(string $id, BlogData $data)
     {
         $blog = $this->findById($id);
         if (!$blog) return null;
@@ -46,16 +49,16 @@ class BlogRepository implements BlogRepositoryInterface
         return $blog->load('products');
     }
 
-    public function findByProduct(string $productId): Collection
+    public function findByProduct(string $productId)
     {
-        return $this->model->whereHas('products', function ($query) use ($productId) {
+        return $this->blog->whereHas('products', function ($query) use ($productId) {
             $query->where('products.id', $productId);
         })->get();
     }
 
-    public function findByCriteria(array $criteria): LengthAwarePaginator
+    public function findByCriteria(array $criteria)
     {
-        $query = $this->model->query();
+        $query = $this->blog->query();
 
         if (isset($criteria['search'])) {
             $query->where(function ($q) use ($criteria) {
@@ -77,8 +80,8 @@ class BlogRepository implements BlogRepositoryInterface
         return $query->with('products')->paginate($criteria['per_page'] ?? 15);
     }
 
-    public function delete(string $id): bool
+    public function delete(string $id)
     {
-        return $this->model->findOrFail($id)->delete();
+        return $this->blog->findOrFail($id)->delete();
     }
 }

@@ -3,19 +3,23 @@ namespace App\Repositories\Eloquent;
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use App\Repositories\Interfaces\ReviewRepositoryInterface;
+use App\Dtos\ReviewData;
+use App\Models\Review;
+
 
 class ReviewRepository implements ReviewRepositoryInterface
 {
-    public function __construct(protected Review $model) {}
+    public function __construct(protected Review $review) {}
 
-    public function findById(string $id): ?Review
+    public function findById(string $id)
     {
-        return $this->model->with(['user', 'product'])->find($id);
+        return $this->review->with(['user', 'product'])->find($id);
     }
 
-    public function create(ReviewData $data): Review
+    public function create(ReviewData $data)
     {
-        return $this->model->create([
+        return $this->review->create([
             'product_id' => $data->productId,
             'user_id' => $data->userId,
             'rating' => $data->rating,
@@ -24,7 +28,7 @@ class ReviewRepository implements ReviewRepositoryInterface
         ]);
     }
 
-    public function update(string $id, ReviewData $data): ?Review
+    public function update(string $id, ReviewData $data)
     {
         $review = $this->findById($id);
         if (!$review) return null;
@@ -38,31 +42,31 @@ class ReviewRepository implements ReviewRepositoryInterface
         return $review;
     }
 
-    public function findByProduct(string $productId): Collection
+    public function findByProduct(string $productId)
     {
-        return $this->model->where('product_id', $productId)
+        return $this->review->where('product_id', $productId)
             ->with('user')
             ->orderBy('created_at', 'desc')
             ->get();
     }
 
-    public function findByUser(string $userId): Collection
+    public function findByUser(string $userId)
     {
-        return $this->model->where('user_id', $userId)
+        return $this->review->where('user_id', $userId)
             ->with('product')
             ->orderBy('created_at', 'desc')
             ->get();
     }
 
-    public function getAverageRating(string $productId): float
+    public function getAverageRating(string $productId)
     {
-        return $this->model->where('product_id', $productId)
+        return $this->review->where('product_id', $productId)
             ->where('status', true)
             ->avg('rating') ?? 0.0;
     }
 
-    public function delete(string $id): bool
+    public function delete(string $id)
     {
-        return $this->model->findOrFail($id)->delete();
+        return $this->review->findOrFail($id)->delete();
     }
 }

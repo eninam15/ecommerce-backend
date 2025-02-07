@@ -8,8 +8,10 @@ use App\Http\Controllers\Api\ShippingAddressController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\BannerController;
-
-
+use App\Http\Controllers\Api\BlogController;
+use App\Http\Controllers\Api\ReviewController;
+use App\Http\Controllers\Api\PromotionController;
+use App\Http\Controllers\Api\RelatedProductController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {

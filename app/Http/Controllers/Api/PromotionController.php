@@ -4,6 +4,11 @@ namespace App\Http\Controllers\Api;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use App\Http\Controllers\Controller;
+use App\Services\PromotionService;
+use App\Http\Resources\PromotionResource;
+use App\Http\Requests\Promotion\PromotionRequest;
+use App\Dtos\PromotionData;
 
 class PromotionController extends Controller
 {
@@ -37,7 +42,7 @@ class PromotionController extends Controller
     public function show(string $id)
     {
         $promotion = $this->promotionService->getPromotion($id);
-        
+
         return new PromotionResource($promotion);
     }
 
@@ -54,21 +59,21 @@ class PromotionController extends Controller
     public function destroy(string $id)
     {
         $this->promotionService->deletePromotion($id);
-        
+
         return response()->noContent();
     }
 
     public function getActivePromotions()
     {
         $promotions = $this->promotionService->getActivePromotions();
-        
+
         return PromotionResource::collection($promotions);
     }
 
     public function getProductPromotions(string $productId)
     {
         $promotions = $this->promotionService->getProductPromotions($productId);
-        
+
         return PromotionResource::collection($promotions);
     }
 }

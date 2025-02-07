@@ -1,15 +1,15 @@
 <?php
 namespace App\Repositories\Interfaces;
 
-use App\Dtos\ShippingAddressData;
+use App\Dtos\ReviewData;
 
 interface ReviewRepositoryInterface
 {
-    public function findById(string $id): ?Review;
-    public function create(ReviewData $data): Review;
-    public function update(string $id, ReviewData $data): ?Review;
-    public function delete(string $id): bool;
-    public function findByProduct(string $productId): Collection;
-    public function findByUser(string $userId): Collection;
-    public function getAverageRating(string $productId): float;
+    public function findById(string $id);
+    public function create(ReviewData $data);
+    public function update(string $id, ReviewData $data);
+    public function delete(string $id);
+    public function findByProduct(string $productId);
+    public function findByUser(string $userId);
+    public function getAverageRating(string $productId);
 }

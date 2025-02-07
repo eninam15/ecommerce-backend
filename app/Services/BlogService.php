@@ -1,6 +1,9 @@
 <?php
 namespace App\Services;
 use Illuminate\Pagination\LengthAwarePaginator;
+use App\Repositories\Interfaces\BlogRepositoryInterface;
+use App\Dtos\BlogData;
+
 
 
 class BlogService
@@ -9,7 +12,7 @@ class BlogService
         protected BlogRepositoryInterface $blogRepository
     ) {}
 
-    public function createBlog(BlogData $data): Blog
+    public function createBlog(BlogData $data)
     {
         return $this->blogRepository->create($data);
     }

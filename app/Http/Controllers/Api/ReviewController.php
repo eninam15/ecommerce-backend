@@ -4,6 +4,11 @@ namespace App\Http\Controllers\Api;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use App\Http\Controllers\Controller;
+use App\Services\ReviewService;
+use App\Http\Resources\ReviewResource;
+use App\Http\Requests\Review\ReviewRequest;
+use App\Dtos\ReviewData;
 
 class ReviewController extends Controller
 {
@@ -33,7 +38,7 @@ class ReviewController extends Controller
     public function productReviews(string $productId)
     {
         $reviews = $this->reviewService->getProductReviews($productId);
-        
+
         return ReviewResource::collection($reviews);
     }
 }

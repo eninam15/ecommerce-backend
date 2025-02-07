@@ -3,19 +3,26 @@ namespace App\Repositories\Eloquent;
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use App\Repositories\Interfaces\PromotionRepositoryInterface;
+use App\Dtos\PromotionData;
+use App\Models\Promotion;
+
 
 class PromotionRepository implements PromotionRepositoryInterface
 {
-    public function __construct(protected Promotion $model) {}
+    public function __construct(protected Promotion $promotion) {}
 
-    public function findById(string $id): ?Promotion
+    public function findById(string $id)
     {
-        return $this->model->with(['products'])->find($id);
+        return $this->promotion->with(['products'])->find($id);
     }
 
-    public function create(PromotionData $data): Promotion
+    public function create(PromotionData $data)
     {
-        $promotion = $this->model->create([
+
+        //dd("Aqui la informaicon de data: ", $data);
+
+        $promotion = $this->promotion->create([
             'name' => $data->name,
             'description' => $data->description,
             'type' => $data->type->value,
@@ -26,7 +33,7 @@ class PromotionRepository implements PromotionRepositoryInterface
             'status' => $data->status,
             'min_quantity' => $data->minQuantity,
             'max_quantity' => $data->maxQuantity,
-            'created_by' => auth()->id(),
+            'created_by' => "9e11891b-a9f8-475a-85ab-8061ae9dd73e",
         ]);
 
         foreach ($data->products as $product) {
@@ -39,7 +46,7 @@ class PromotionRepository implements PromotionRepositoryInterface
         return $promotion->load('products');
     }
 
-    public function update(string $id, PromotionData $data): ?Promotion
+    public function update(string $id, PromotionData $data)
     {
         $promotion = $this->findById($id);
         if (!$promotion) return null;
@@ -71,28 +78,28 @@ class PromotionRepository implements PromotionRepositoryInterface
         return $promotion->load('products');
     }
 
-    public function delete(string $id): bool
+    public function delete(string $id)
     {
-        return $this->model->findOrFail($id)->delete();
+        return $this->promotion->findOrFail($id)->delete();
     }
 
-    public function findActive(): Collection
+    public function findActive()
     {
-        return $this->model->active()
+        return $this->promotion->active()
             ->with('products')
             ->get();
     }
 
-    public function findByProduct(string $productId): Collection
+    public function findByProduct(string $productId)
     {
-        return $this->model->whereHas('products', function ($query) use ($productId) {
+        return $this->promotion->whereHas('products', function ($query) use ($productId) {
             $query->where('products.id', $productId);
         })->active()->get();
     }
 
-    public function findByCriteria(array $criteria): LengthAwarePaginator
+    public function findByCriteria(array $criteria)
     {
-        $query = $this->model->query();
+        $query = $this->promotion->query();
 
         if (isset($criteria['search'])) {
             $query->where(function ($q) use ($criteria) {

@@ -1,6 +1,10 @@
 <?php
 namespace App\Services;
 use Illuminate\Pagination\LengthAwarePaginator;
+use App\Repositories\Interfaces\ReviewRepositoryInterface;
+use App\Repositories\Interfaces\ProductRepositoryInterface;
+use App\Dtos\ReviewData;
+
 
 class ReviewService
 {
@@ -9,42 +13,42 @@ class ReviewService
         protected ProductRepositoryInterface $productRepository
     ) {}
 
-    public function createReview(ReviewData $data): Review
+    public function createReview(ReviewData $data)
     {
         $this->validateProduct($data->productId);
         $this->validateUserReview($data->productId, $data->userId);
-        
+
         return $this->reviewRepository->create($data);
     }
 
     public function updateReview(string $id, ReviewData $data): ?Review
     {
         $review = $this->reviewRepository->findById($id);
-        
+
         if (!$review || $review->user_id !== $data->userId) {
             throw new AuthorizationException('No estás autorizado para actualizar esta reseña');
         }
-        
+
         return $this->reviewRepository->update($id, $data);
     }
 
     public function deleteReview(string $id, string $userId): bool
     {
         $review = $this->reviewRepository->findById($id);
-        
+
         if (!$review || $review->user_id !== $userId) {
             throw new AuthorizationException('No estás autorizado para eliminar esta reseña');
         }
-        
+
         return $this->reviewRepository->delete($id);
     }
 
-    public function getProductReviews(string $productId): Collection
+    public function getProductReviews(string $productId)
     {
         return $this->reviewRepository->findByProduct($productId);
     }
 
-    public function getUserReviews(string $userId): Collection
+    public function getUserReviews(string $userId)
     {
         return $this->reviewRepository->findByUser($userId);
     }

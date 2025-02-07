@@ -1,5 +1,6 @@
 <?php
 namespace App\Dtos;
+use App\Http\Requests\Review\ReviewRequest;
 
 class ReviewData
 {

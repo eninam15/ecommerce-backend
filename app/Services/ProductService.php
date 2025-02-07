@@ -6,6 +6,13 @@ use App\Dtos\ProductFilterData;
 use App\Dtos\ProductCartMarkingData;
 use App\Repositories\Interfaces\ProductRepositoryInterface;
 use App\Repositories\Interfaces\CartRepositoryInterface;
+use App\Repositories\Interfaces\RelatedProductRepositoryInterface;
+use App\Repositories\Interfaces\PromotionRepositoryInterface;
+use App\Repositories\Interfaces\ReviewRepositoryInterface;
+use App\Dtos\RelatedProductData;
+
+
+
 
 class ProductService
 {
@@ -13,7 +20,7 @@ class ProductService
     protected $cartRepository;
     protected $relatedProductRepository;
     protected $promotionRepository;
-    protected $reviewRepository; 
+    protected $reviewRepository;
 
     public function __construct(
         ProductRepositoryInterface $productRepository,
@@ -25,6 +32,10 @@ class ProductService
     ) {
         $this->productRepository = $productRepository;
         $this->cartRepository = $cartRepository;
+
+        $this->relatedProductRepository = $relatedProductRepository;
+        $this->promotionRepository = $promotionRepository;
+        $this->reviewRepository = $reviewRepository;
     }
 
     public function listProducts(ProductFilterData $filters, ?string $userId = null): LengthAwarePaginator {
@@ -99,7 +110,7 @@ class ProductService
         ]);
     }
 
-    public function createProductRelations(RelatedProductData $data): Collection
+    public function createProductRelations(RelatedProductData $data)
     {
         return $this->relatedProductRepository->create($data);
     }
@@ -109,7 +120,7 @@ class ProductService
         return $this->relatedProductRepository->delete($productId, $relatedProductId);
     }
 
-    public function findRelatedProducts(string $productId, int $limit = 5): Collection
+    public function findRelatedProducts(string $productId, int $limit = 5)
     {
         return $this->relatedProductRepository->findSimilarProducts($productId, $limit);
     }
@@ -118,7 +129,7 @@ class ProductService
     {
         $product = $this->productRepository->findById($productId);
         $regularPrice = $product->price * $quantity;
-        
+
         $activePromotions = $this->promotionRepository->findByProduct($productId);
         if ($activePromotions->isEmpty()) {
             return [

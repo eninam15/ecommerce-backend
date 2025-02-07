@@ -2,6 +2,9 @@
 namespace App\Dtos;
 
 use Spatie\DataTransferObject\DataTransferObject;
+use App\Http\Requests\Blog\BlogRequest;
+use Illuminate\Support\Str;
+
 
 class BlogData
 {

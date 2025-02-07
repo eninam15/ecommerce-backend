@@ -9,7 +9,7 @@ interface ProductRepositoryInterface
     public function create(ProductData $data, string $userId);
     public function update(string $id, ProductData $data);
     public function delete(string $id);
-    public function find(string $id);
+    public function findById(string $id);
     public function findByCategory(string $categoryId);
     public function reserveStock(string $id, int $quantity);
 }

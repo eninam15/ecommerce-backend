@@ -17,6 +17,14 @@ use App\Repositories\Interfaces\PaymentRepositoryInterface;
 use App\Repositories\Eloquent\PaymentRepository;
 use App\Repositories\Interfaces\BannerRepositoryInterface;
 use App\Repositories\Eloquent\BannerRepository;
+use App\Repositories\Interfaces\ReviewRepositoryInterface;
+use App\Repositories\Eloquent\ReviewRepository;
+use App\Repositories\Interfaces\RelatedProductRepositoryInterface;
+use App\Repositories\Eloquent\RelatedProductRepository;
+use App\Repositories\Interfaces\PromotionRepositoryInterface;
+use App\Repositories\Eloquent\PromotionRepository;
+use App\Repositories\Interfaces\BlogRepositoryInterface;
+use App\Repositories\Eloquent\BlogRepository;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -31,7 +39,10 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(ShippingAddressRepositoryInterface::class, ShippingAddressRepository::class);
         $this->app->bind(PaymentRepositoryInterface::class, PaymentRepository::class);
         $this->app->bind(BannerRepositoryInterface::class, BannerRepository::class);
-
+        $this->app->bind(ReviewRepositoryInterface::class, ReviewRepository::class);
+        $this->app->bind(RelatedProductRepositoryInterface::class, RelatedProductRepository::class);
+        $this->app->bind(PromotionRepositoryInterface::class, PromotionRepository::class);
+        $this->app->bind(BlogRepositoryInterface::class, BlogRepository::class);
     }
 
     /**

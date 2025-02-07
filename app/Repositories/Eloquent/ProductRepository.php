@@ -167,7 +167,7 @@ class ProductRepository implements ProductRepositoryInterface
         return $product->delete();
     }
 
-    public function find(string $id)
+    public function findById(string $id)
     {
         return $this->model->with('category')->findOrFail($id);
     }

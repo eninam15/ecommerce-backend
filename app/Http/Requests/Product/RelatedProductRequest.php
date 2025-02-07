@@ -2,6 +2,9 @@
 
 namespace App\Http\Requests\Product;
 use App\Rules\Uuid;
+use App\Enums\RelationshipTypeEnum;
+use Illuminate\Validation\Rule;
+
 
 use Illuminate\Foundation\Http\FormRequest;
 

@@ -4,6 +4,11 @@ namespace App\Http\Controllers\Api;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use App\Http\Controllers\Controller;
+use App\Services\BlogService;
+use App\Http\Resources\BlogResource;
+use App\Http\Requests\Blog\BlogRequest;
+use App\Dtos\BlogData;
 
 class BlogController extends Controller
 {
@@ -35,7 +40,7 @@ class BlogController extends Controller
     public function show(string $id)
     {
         $blog = $this->blogService->getBlog($id);
-        
+
         return new BlogResource($blog);
     }
 
@@ -52,7 +57,7 @@ class BlogController extends Controller
     public function destroy(string $id)
     {
         $this->blogService->deleteBlog($id);
-        
+
         return response()->noContent();
     }
 }

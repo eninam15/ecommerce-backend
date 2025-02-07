@@ -1,5 +1,8 @@
 <?php
 namespace App\Dtos;
+use App\Http\Requests\Product\RelatedProductRequest;
+use App\Enums\RelationshipTypeEnum;
+
 
 class RelatedProductData
 {

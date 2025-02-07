@@ -1,9 +1,11 @@
 <?php
 
-namespace App\Http\Requests\Product;
-use App\Rules\Uuid;
-
+namespace App\Http\Requests\Promotion;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
+use App\Rules\Uuid;
+use App\Enums\PromotionTypeEnum;
+use App\Enums\DiscountTypeEnum;
 
 class PromotionRequest extends FormRequest
 {

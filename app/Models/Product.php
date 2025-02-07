@@ -38,7 +38,7 @@ class Product extends Model
     protected static function boot()
     {
         parent::boot();
-        
+
         static::creating(function ($model) {
             $model->{$model->getKeyName()} = Str::uuid()->toString();
             $model->slug = Str::slug($model->name);
@@ -63,5 +63,32 @@ class Product extends Model
     public function images()
     {
         return $this->hasMany(ProductImage::class);
+    }
+
+    public function relatedProducts()
+    {
+        return $this->hasMany(RelatedProduct::class)
+            ->with('relatedProduct');
+    }
+
+    public function blogs()
+    {
+        return $this->belongsToMany(Blog::class, 'blog_product');
+    }
+
+    public function reviews()
+    {
+        return $this->hasMany(Review::class);
+    }
+
+    public function promotions()
+    {
+        return $this->belongsToMany(Promotion::class, 'promotion_product')
+            ->withPivot('discount_value', 'quantity_required');
+    }
+
+    public function getAverageRatingAttribute()
+    {
+        return $this->reviews()->avg('rating');
     }
 }

@@ -1,6 +1,11 @@
 <?php
 namespace App\Services;
 use Illuminate\Pagination\LengthAwarePaginator;
+use App\Repositories\Interfaces\PromotionRepositoryInterface;
+use App\Repositories\Interfaces\ProductRepositoryInterface;
+use App\Dtos\PromotionData;
+
+
 
 class PromotionService
 {
@@ -9,11 +14,11 @@ class PromotionService
         protected ProductRepositoryInterface $productRepository
     ) {}
 
-    public function createPromotion(PromotionData $data): Promotion
+    public function createPromotion(PromotionData $data)
     {
         $this->validatePromotionOverlap($data);
         $this->validateProducts($data->products);
-        
+
         return $this->promotionRepository->create($data);
     }
 
@@ -21,7 +26,7 @@ class PromotionService
     {
         $this->validatePromotionOverlap($data, $id);
         $this->validateProducts($data->products);
-        
+
         return $this->promotionRepository->update($id, $data);
     }
 
@@ -40,12 +45,12 @@ class PromotionService
         return $this->promotionRepository->findByCriteria($criteria);
     }
 
-    public function getActivePromotions(): Collection
+    public function getActivePromotions()
     {
         return $this->promotionRepository->findActive();
     }
 
-    public function getProductPromotions(string $productId): Collection
+    public function getProductPromotions(string $productId)
     {
         return $this->promotionRepository->findByProduct($productId);
     }
@@ -56,7 +61,7 @@ class PromotionService
             $overlappingPromotions = $this->promotionRepository->findByProduct($product['product_id'])
                 ->filter(function ($promotion) use ($data, $excludePromotionId) {
                     return $promotion->id !== $excludePromotionId &&
-                           $promotion->ends_at > $data->startsAt && 
+                           $promotion->ends_at > $data->startsAt &&
                            $promotion->starts_at < $data->endsAt;
                 });
 
@@ -79,7 +84,7 @@ class PromotionService
     public function calculatePromotionalPrice(string $productId, int $quantity = 1): float
     {
         $activePromotions = $this->promotionRepository->findByProduct($productId);
-        
+
         if ($activePromotions->isEmpty()) {
             return null;
         }

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests\Product;
+namespace App\Http\Requests\Review;
 use App\Rules\Uuid;
 
 use Illuminate\Foundation\Http\FormRequest;
