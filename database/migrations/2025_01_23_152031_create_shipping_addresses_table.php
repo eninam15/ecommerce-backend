@@ -11,17 +11,14 @@ return new class extends Migration
         Schema::create('shipping_addresses', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->uuid('user_id');
-            $table->string('name'); // Nombre de la dirección (ej: "Casa", "Trabajo")
-            $table->string('recipient_name');
-            $table->string('phone');
-            $table->string('address_line1');
-            $table->string('address_line2')->nullable();
+            $table->string('name');
+            $table->string('last_name');
+            $table->string('email');
+            $table->string('address');
             $table->string('city');
-            $table->string('state');
-            $table->string('country');
-            $table->string('postal_code');
-            $table->boolean('is_default')->default(false);
+            $table->string('phone');
             $table->text('delivery_instructions')->nullable();
+            $table->boolean('is_default')->default(false);
             $table->timestamps();
             $table->softDeletes();
 

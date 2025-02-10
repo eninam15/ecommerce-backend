@@ -22,7 +22,6 @@ class ShippingAddressRepository implements ShippingAddressRepositoryInterface
     public function create(string $userId, ShippingAddressData $data)
     {
         return DB::transaction(function () use ($userId, $data) {
-            // Si es la dirección predeterminada, quitar el estado predeterminado de otras direcciones
             if ($data->is_default) {
                 $this->model->where('user_id', $userId)
                            ->where('is_default', true)

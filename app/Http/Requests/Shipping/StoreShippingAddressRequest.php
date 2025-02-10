@@ -14,16 +14,13 @@ class StoreShippingAddressRequest extends FormRequest
     {
         return [
             'name' => 'required|string|max:255',
-            'recipient_name' => 'required|string|max:255',
-            'phone' => 'required|string|max:20',
-            'address_line1' => 'required|string|max:255',
-            'address_line2' => 'nullable|string|max:255',
+            'last_name' => 'required|string|max:255',
+            'email' => 'required|string|max:255',
+            'address' => 'required|string|max:255',
             'city' => 'required|string|max:255',
-            'state' => 'required|string|max:255',
-            'country' => 'required|string|max:255',
-            'postal_code' => 'required|string|max:20',
-            'is_default' => 'boolean',
-            'delivery_instructions' => 'nullable|string|max:500'
+            'phone' => 'required|string|max:20',
+            'delivery_instructions' => 'nullable|string|max:500',
+            'is_default' => 'boolean'
         ];
     }
 }

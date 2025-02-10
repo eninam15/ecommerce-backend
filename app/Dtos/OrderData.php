@@ -8,14 +8,20 @@ class OrderData extends DataTransferObject
 {
     public string $shipping_address_id;
     public ?string $notes;
-    public ?array $cart_items;
 
     public static function fromRequest($request): self
     {
         return new self([
             'shipping_address_id' => $request->shipping_address_id,
-            'notes' => $request->notes,
-            'cart_items' => $request->cart_items
+            'notes' => $request->notes
+        ]);
+    }
+
+    public static function fromArray(array $data): self
+    {
+        return new self([
+            'shipping_address_id' => $data['shipping_address_id'],
+            'notes' => $data['notes'] ?? null
         ]);
     }
 }

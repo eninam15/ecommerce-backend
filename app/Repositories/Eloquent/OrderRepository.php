@@ -27,8 +27,6 @@ class OrderRepository implements OrderRepositoryInterface
         try {
             $cart = $this->cartService->getOrCreateCart($userId);
 
-
-
             $order = $this->order->create([
                 'user_id' => $userId,
                 'shipping_address_id' => $data->shipping_address_id,

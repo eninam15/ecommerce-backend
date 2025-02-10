@@ -22,7 +22,7 @@ class CreateOrderRequest extends FormRequest
             'tax' => ['required', 'numeric', 'min:0'],
             'shipping_cost' => ['required', 'numeric', 'min:0'],
             'total' => ['required', 'numeric', 'min:0'],
-            'status' => ['required', 'string', Rule::in(['pending', 'paid', 'shipped', 'cancelled', 'completed'])], // Puedes ajustar los valores posibles
+            'status' => ['required', 'string', Rule::in(['pending', 'paid', 'shipped', 'cancelled', 'completed'])],
             'notes' => ['nullable', 'string', 'max:500'],
         ];
     }

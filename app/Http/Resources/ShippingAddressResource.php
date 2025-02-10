@@ -9,17 +9,15 @@ class ShippingAddressResource extends JsonResource
     {
         return [
             'id' => $this->id,
+            'order_id' => $this->order_id,
             'name' => $this->name,
-            'recipient_name' => $this->recipient_name,
-            'phone' => $this->phone,
-            'address_line1' => $this->address_line1,
-            'address_line2' => $this->address_line2,
+            'last_name' => $this->last_name,
+            'email' => $this->email,
+            'address' => $this->address,
             'city' => $this->city,
-            'state' => $this->state,
-            'country' => $this->country,
-            'postal_code' => $this->postal_code,
-            'is_default' => $this->is_default,
+            'phone' => $this->phone,
             'delivery_instructions' => $this->delivery_instructions,
+            'is_default' => $this->is_default,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
             'formatted_address' => $this->getFormattedAddress()
@@ -29,12 +27,8 @@ class ShippingAddressResource extends JsonResource
     private function getFormattedAddress(): string
     {
         $parts = [
-            $this->address_line1,
-            $this->address_line2,
+            $this->address,
             $this->city,
-            $this->state,
-            $this->country,
-            $this->postal_code
         ];
 
         return implode(', ', array_filter($parts));

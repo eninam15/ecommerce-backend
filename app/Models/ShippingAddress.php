@@ -13,16 +13,13 @@ class ShippingAddress extends Model
     protected $fillable = [
         'user_id',
         'name',
-        'recipient_name',
-        'phone',
-        'address_line1',
-        'address_line2',
+        'last_name',
+        'email',
+        'address',
         'city',
-        'state',
-        'country',
-        'postal_code',
-        'is_default',
-        'delivery_instructions'
+        'phone',
+        'delivery_instructions',
+        'is_default'
     ];
 
     protected $casts = [
