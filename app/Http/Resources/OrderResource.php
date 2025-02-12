@@ -23,6 +23,7 @@ class OrderResource extends JsonResource
             'status_history' => OrderStatusHistoryResource::collection(
                 $this->whenLoaded('statusHistories')
             ),
+            'user' => new UserResource($this->whenLoaded('user')),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at
         ];

@@ -97,7 +97,7 @@ class OrderRepository implements OrderRepositoryInterface
     public function getUserOrders(string $userId)
     {
         return $this->order->where('user_id', $userId)
-            ->with(['items.product', 'statusHistories'])
+            ->with(['items.product', 'shippingAddress', 'statusHistories'])
             ->latest()
             ->get();
     }
@@ -110,5 +110,42 @@ class OrderRepository implements OrderRepositoryInterface
             'comment' => $data->comment,
             'created_by' => $userId
         ]);
+    }
+
+    public function getAllOrders(?string $status = null, ?string $dateFrom = null,
+    ?string $dateTo = null, ?string $search = null, int $perPage = 15)
+    {
+        $query = $this->order->with(['items.product', 'user', 'shippingAddress', 'statusHistories'])
+            ->when($status, function ($query, $status) {
+                return $query->where('status', $status);
+            })
+            ->when($dateFrom, function ($query, $dateFrom) {
+                return $query->whereDate('created_at', '>=', $dateFrom);
+            })
+            ->when($dateTo, function ($query, $dateTo) {
+                return $query->whereDate('created_at', '<=', $dateTo);
+            })
+            ->when($search, function ($query, $search) {
+                return $query->where(function ($q) use ($search) {
+                    $q->whereHas('user', function ($userQuery) use ($search) {
+                        $userQuery->where('name', 'like', "%{$search}%")
+                            ->orWhere('email', 'like', "%{$search}%");
+                    })
+                    ->orWhere('id', 'like', "%{$search}%");
+                });
+            })
+            ->latest();
+
+        return $query->paginate($perPage);
+    }
+
+    public function findWithDetails(string $id)
+    {
+        return $this->order->with([
+            'user',
+            'items.product',
+            'shippingAddress',
+            'statusHistories',
+        ])->findOrFail($id);
     }
 }

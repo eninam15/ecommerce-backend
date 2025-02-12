@@ -48,4 +48,28 @@ class OrderService
     {
         return $this->orderRepository->addStatusHistory($orderId, $data, $userId);
     }
+
+    public function getAllOrders(?string $status = null, ?string $dateFrom = null,
+    ?string $dateTo = null, ?string $search = null, int $perPage = 15)
+    {
+        return $this->orderRepository->getAllOrders($status, $dateFrom, $dateTo, $search, $perPage);
+    }
+
+    public function findOrderWithDetails(string $orderId)
+    {
+        return $this->orderRepository->findWithDetails($orderId);
+    }
+
+    public function updateOrderStatusAsAdmin(string $orderId, OrderStatusData $data, string $adminId)
+    {
+        $order = $this->orderRepository->update($orderId, $data);
+        $this->addOrderStatusHistory($orderId, $data, $adminId);
+
+        // Here you could add admin-specific logic, like:
+        // - Logging admin actions
+        // - Sending different types of notifications
+        // - Triggering specific workflows
+
+        return $order;
+    }
 }

@@ -32,6 +32,11 @@ class User extends Authenticatable
         'password' => 'hashed',
     ];
 
+    public function isAdmin()
+    {
+        return $this->hasRole('admin');
+    }
+
     public function productsCreated()
     {
         return $this->hasMany(Product::class, 'created_by');
@@ -42,4 +47,8 @@ class User extends Authenticatable
         return $this->hasMany(Product::class, 'updated_by');
     }
 
+    public function orders()
+    {
+        return $this->hasMany(Order::class, 'user_id', 'id');
+    }
 }
