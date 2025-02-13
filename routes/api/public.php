@@ -12,6 +12,8 @@ use Illuminate\Support\Facades\Route;
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
+Route::get('/banners', [BannerController::class, 'getBanners']);
+
 // Public Product Routes
 Route::get('/products', [ProductController::class, 'index']);
 Route::get('/products/{product}', [ProductController::class, 'show']);
@@ -20,9 +22,6 @@ Route::get('/products/{product}/related', [ProductController::class, 'getRelated
 // Public Category Routes
 Route::get('/categories', [CategoryController::class, 'index']);
 Route::get('/categories/{category}', [CategoryController::class, 'show']);
-
-// Public Banner Routes
-Route::get('/banners', [BannerController::class, 'index']);
 
 // Public Blog Routes
 Route::get('/blogs', [BlogController::class, 'index']);

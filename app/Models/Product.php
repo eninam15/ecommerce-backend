@@ -17,22 +17,35 @@ class Product extends Model
 
     protected $fillable = [
         'category_id',
+        'code',
         'name',
+        'slug',
         'description',
         'price',
+        'cost_price',
+        'weight',
+        'volume',
+        'flavor',
+        'presentation',
         'stock',
+        'min_stock',
+        'sku',
+        'barcode',
         'status',
-        'attributes',
+        'featured',
+        'is_seasonal',
+        'manufacture_date',
+        'expiry_date',
+        'nutritional_info',
+        'ingredients',
         'created_by',
         'updated_by',
-        'slug',
     ];
 
     protected $casts = [
         'price' => 'decimal:2',
         'stock' => 'integer',
-        'status' => 'boolean',
-        'attributes' => 'array'
+        'status' => 'boolean'
     ];
 
     protected static function boot()
@@ -43,16 +56,6 @@ class Product extends Model
             $model->{$model->getKeyName()} = Str::uuid()->toString();
             $model->slug = Str::slug($model->name);
         });
-    }
-
-    public function created_by()
-    {
-        return $this->belongsTo(User::class, 'created_by');
-    }
-
-    public function updated_by()
-    {
-        return $this->belongsTo(User::class, 'updated_by');
     }
 
     public function category()

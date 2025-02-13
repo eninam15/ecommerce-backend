@@ -73,6 +73,11 @@ class ProductService
         return $this->productRepository->create($data, $userId);
     }
 
+    public function createBulkProducts(array $productsData, string $userId)
+    {
+        return $this->productRepository->createBulk($productsData, $userId);
+    }
+
     public function updateProduct(string $id, ProductData $data)
     {
         return $this->productRepository->update($id, $data);

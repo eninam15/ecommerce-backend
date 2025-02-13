@@ -135,6 +135,55 @@ class ProductRepository implements ProductRepositoryInterface
         });
     }
 
+    public function createBulk(array $productsData, string $userId)
+    {
+        return DB::transaction(function () use ($productsData, $userId) {
+            $products = collect();
+
+            foreach ($productsData as $productData) {
+                // Convertir arrays a JSON antes de la inserción
+                $productData['nutritional_info'] = isset($productData['nutritional_info'])
+                    ? json_encode($productData['nutritional_info'])
+                    : null;
+
+                $productData['ingredients'] = isset($productData['ingredients'])
+                    ? json_encode($productData['ingredients'])
+                    : null;
+
+                $product = $this->model->create([
+                    'category_id' => $productData['category_id'],
+                    'code' => $productData['code'],
+                    'name' => $productData['name'],
+                    'slug' => Str::slug($productData['name']),
+                    'description' => $productData['description'] ?? null,
+                    'price' => $productData['price'],
+                    'cost_price' => $productData['cost_price'] ?? null,
+                    'weight' => $productData['weight'] ?? null,
+                    'volume' => $productData['volume'] ?? null,
+                    'flavor' => $productData['flavor'] ?? null,
+                    'presentation' => $productData['presentation'] ?? null,
+                    'stock' => $productData['stock'],
+                    'min_stock' => $productData['min_stock'] ?? 0,
+                    'sku' => $productData['sku'] ?? null,
+                    'barcode' => $productData['barcode'] ?? null,
+                    'status' => $productData['status'] ?? true,
+                    'featured' => $productData['featured'] ?? false,
+                    'is_seasonal' => $productData['is_seasonal'] ?? false,
+                    'manufacture_date' => $productData['manufacture_date'] ?? null,
+                    'expiry_date' => $productData['expiry_date'] ?? null,
+                    'nutritional_info' => $productData['nutritional_info'],
+                    'ingredients' => $productData['ingredients'],
+                    'created_by' => $userId,
+                    'updated_by' => $userId,
+                ]);
+
+                $products->push($product);
+            }
+
+            return $products;
+        });
+    }
+
     public function update(string $id, ProductData $data)
     {
         $product = $this->model->findOrFail($id);

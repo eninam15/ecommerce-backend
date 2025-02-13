@@ -7,6 +7,7 @@ interface ProductRepositoryInterface
 {
     public function all();
     public function create(ProductData $data, string $userId);
+    public function createBulk(array $productsData, string $userId);
     public function update(string $id, ProductData $data);
     public function delete(string $id);
     public function findById(string $id);

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Product\ProductRequest;
+use App\Http\Requests\Product\BulkProductRequest;
 use App\Http\Resources\ProductResource;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -14,6 +15,8 @@ use App\Models\Product;
 use App\Dtos\ProductData;
 use App\Dtos\ProductFilterData;
 use App\Enums\ProductSortEnum;
+use Illuminate\Support\Facades\Log;
+
 
 class ProductController extends Controller
 {
@@ -51,6 +54,29 @@ class ProductController extends Controller
         );
 
         return new ProductResource($product->load(['category', 'images', 'created_by', 'updated_by']));
+    }
+
+    public function bulkStore(BulkProductRequest $request)
+    {
+        try {
+            $products = $this->productService->createBulkProducts(
+                $request->validated()['products'],
+                '9e0a4d30-c294-4141-8c8f-dd77bd5a2466'
+            );
+
+            $products->each(function ($product) {
+                $product->load(['category']);
+            });
+
+            return ProductResource::collection($products);
+        } catch (\Exception $e) {
+            Log::error('Error en bulkStore', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            throw $e;
+        }
     }
 
     public function show(Product $product)

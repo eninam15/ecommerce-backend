@@ -158,6 +158,8 @@ return [
      */
     // 'permission.wildcard_permission' => Spatie\Permission\WildcardPermission::class,
 
+    'guards' => ['web', 'api'],
+
     /* Cache-specific settings */
 
     'cache' => [

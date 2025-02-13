@@ -88,6 +88,8 @@ return [
 
     'table' => env('SESSION_TABLE', 'sessions'),
 
+    'id' => 'string',
+
     /*
     |--------------------------------------------------------------------------
     | Session Cache Store
@@ -101,7 +103,7 @@ return [
     |
     */
 
-    'store' => env('SESSION_STORE'),
+    'store' => env('SESSION_STORE', 'database'),
 
     /*
     |--------------------------------------------------------------------------

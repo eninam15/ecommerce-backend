@@ -19,18 +19,18 @@ class BannerController extends Controller
         $this->bannerService = $bannerService;
     }
 
-    public function index()
+    public function getBanners()
     {
         $banners = $this->bannerService->getAllBanners();
         return BannerResource::collection($banners);
     }
-    
+
     public function store(BannerRequest $request)
     {
         $banner = $this->bannerService->createBanner($request->validated());
         return new BannerResource($banner);
     }
-    
+
 
     public function show($id)
     {
