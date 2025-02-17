@@ -90,4 +90,9 @@ class PaymentRepository implements PaymentRepositoryInterface
             ->where('created_at', '<', Carbon::now()->subHours(24))
             ->delete();
     }
+
+    public function findByPPETransactionId(string $transactionId): ?Payment
+    {
+        return Payment::whereJsonContains('metadata->ppe_transaction_id', $transactionId)->first();
+    }
 }

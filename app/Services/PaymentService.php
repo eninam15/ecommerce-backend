@@ -101,4 +101,129 @@ class PaymentService
     {
         return $this->paymentRepository->findPaymentAttempts($paymentId);
     }
+
+    public function registerPPEDebt(string $orderId, array $requestData)
+    {
+        $order = $this->orderService->findOrder($orderId);
+
+        if ($this->hasActivePendingPayment($order)) {
+            throw new Exception('Order has pending payment');
+        }
+
+        DB::beginTransaction();
+        try {
+            // Create initial payment record
+            $payment = $this->paymentRepository->create(
+                new PaymentData(
+                    orderId: $order->id,
+                    paymentMethod: PaymentMethod::PPE->value,
+                    provider: 'ppe',
+                    status: PaymentStatus::PENDING->value,
+                    amount: $order->total,
+                    currency: 'BOB'
+                )
+            );
+
+            // Prepare PPE debt registration data
+            $ppeData = [
+                'descripcion' => "Orden #{$order->id}",
+                'codigoOrden' => $order->id,
+                'datosPago' => [
+                    'nombresCliente' => $order->customer->first_name,
+                    'apellidosCliente' => $order->customer->last_name,
+                    'tipoDocumentoCliente' => 1, // CI
+                    'numeroDocumentoCliente' => $order->customer->document_number,
+                    'montoTotal' => $order->total,
+                    'moneda' => 'BOB',
+                    'correo' => $order->customer->email
+                ],
+                'productos' => $this->formatOrderItemsForPPE($order->items)
+            ];
+
+            // Call PPE API
+            $response = $this->callPPEApi('/transaccion/deuda', $ppeData);
+
+            if (!$response['finalizado']) {
+                throw new Exception($response['mensaje']);
+            }
+
+            // Update payment with PPE transaction data
+            $this->paymentRepository->update($payment->id, new PaymentData(
+                metadata: [
+                    'ppe_transaction_id' => $response['datos']['codigoTransaccion'],
+                    'ppe_redirect_url' => $response['datos']['urlRedireccion']
+                ]
+            ));
+
+            DB::commit();
+            return $payment->fresh();
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
+    }
+
+    public function handlePPEWebhook(array $webhookData, string $transactionCode)
+    {
+        // Validate webhook data
+        if (!isset($webhookData['finalizado']) || !isset($webhookData['estado'])) {
+            throw new Exception('Invalid webhook data');
+        }
+
+        $payment = $this->paymentRepository->findByPPETransactionId($transactionCode);
+        if (!$payment) {
+            throw new Exception('Payment not found');
+        }
+
+        if ($webhookData['finalizado'] && $webhookData['estado'] === 'PROCESADO') {
+            // Payment successful
+            return $this->completePayment($payment->id, [
+                'status' => PaymentStatus::COMPLETED->value,
+                'transaction_id' => $webhookData['codigoSeguimiento'],
+                'metadata' => [
+                    'ppe_response' => $webhookData
+                ]
+            ]);
+        } else {
+            // Payment failed
+            return $this->completePayment($payment->id, [
+                'status' => PaymentStatus::FAILED->value,
+                'metadata' => [
+                    'ppe_response' => $webhookData,
+                    'error_message' => $webhookData['mensaje']
+                ]
+            ]);
+        }
+    }
+
+    protected function formatOrderItemsForPPE($items)
+    {
+        return $items->map(function($item) {
+            return [
+                'actividadEconomica' => '620100', // Configure based on your business
+                'descripcion' => $item->product->name,
+                'precioUnitario' => $item->unit_price,
+                'unidadMedida' => 58, // Configure based on your products
+                'cantidad' => $item->quantity
+            ];
+        })->toArray();
+    }
+
+    protected function callPPEApi(string $endpoint, array $data)
+    {
+        $client = new \GuzzleHttp\Client([
+            'base_uri' => config('services.ppe.base_url'),
+            'headers' => [
+                'Authorization' => 'Bearer ' . config('services.ppe.token'),
+                'Content-Type' => 'application/json'
+            ]
+        ]);
+
+        $response = $client->post($endpoint, [
+            'json' => $data
+        ]);
+
+        return json_decode($response->getBody(), true);
+    }
 }

@@ -30,3 +30,4 @@ Route::get('/products/{product}/blogs', [BlogController::class, 'productBlogs'])
 
 // Payment Webhook
 Route::post('webhooks/payments/{provider}', [PaymentController::class, 'webhook']);
+Route::post('payments/ppe-webhook/{transactionCode}', [PaymentController::class, 'ppeWebhook']);

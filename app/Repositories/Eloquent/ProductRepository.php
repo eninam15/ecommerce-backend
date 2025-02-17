@@ -101,9 +101,11 @@ class ProductRepository implements ProductRepositoryInterface
 
     public function create(ProductData $data, string $userId)
     {
+        //dd("Repo ", $data);
         return DB::transaction(function () use ($data, $userId) {
             $product = $this->model->create([
                 'name' => $data->name,
+                'code' => $data->code,
                 'slug' => Str::slug($data->name),
                 'description' => $data->description,
                 'price' => $data->price,

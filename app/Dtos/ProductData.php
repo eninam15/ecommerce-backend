@@ -6,6 +6,7 @@ use Spatie\DataTransferObject\DataTransferObject;
 class ProductData extends DataTransferObject
 {
     public string $category_id;
+    public string $code;
     public string $name;
     public ?string $description;
     public float $price;
@@ -28,6 +29,7 @@ class ProductData extends DataTransferObject
 
         return new self([
             'category_id' => $request->category_id,
+            'code' => $request->code,
             'name' => $request->name,
             'description' => $request->description,
             'price' => $request->price,

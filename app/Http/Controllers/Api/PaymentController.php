@@ -25,6 +25,19 @@ class PaymentController extends Controller
         protected PaymentService $paymentService
     ) {}
 
+
+    public function registerDebt(Request $request, string $orderId)
+    {
+        $payment = $this->paymentService->registerPPEDebt($orderId, $request->all());
+        return new PaymentResource($payment);
+    }
+
+    public function ppeWebhook(Request $request, string $transactionCode)
+    {
+        $result = $this->paymentService->handlePPEWebhook($request->all(), $transactionCode);
+        return response()->json(['status' => 'ok'], 200);
+    }
+
     public function initiate(PaymentRequest $request, string $orderId)
     {
         $payment = $this->paymentService->initiatePayment(
