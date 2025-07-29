@@ -8,6 +8,20 @@ use App\Http\Controllers\Api\ReviewController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth:sanctum'])->group(function () {
+    Route::prefix('coupons')->group(function () {
+        // Validar cupón antes de aplicar
+        Route::post('/validate', [CouponController::class, 'validateCoupon']);
+        
+        // Aplicar cupón al carrito
+        Route::post('/apply', [CouponController::class, 'applyCoupon']);
+        
+        // Remover cupón del carrito
+        Route::delete('/remove', [CouponController::class, 'removeCoupon']);
+        
+        // Obtener cupones válidos para el usuario
+        Route::get('/available', [CouponController::class, 'getValidCoupons']);
+    });
+    
     // Cart Routes
     Route::prefix('cart')->group(function () {
         Route::get('/', [CartController::class, 'getOrCreateCart']);

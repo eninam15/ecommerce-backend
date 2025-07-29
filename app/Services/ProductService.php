@@ -1,50 +1,39 @@
 <?php
+
 namespace App\Services;
+
 use Illuminate\Pagination\LengthAwarePaginator;
 use App\Dtos\ProductData;
 use App\Dtos\ProductFilterData;
 use App\Dtos\ProductCartMarkingData;
+use App\Dtos\StockReservationData;
 use App\Repositories\Interfaces\ProductRepositoryInterface;
 use App\Repositories\Interfaces\CartRepositoryInterface;
 use App\Repositories\Interfaces\RelatedProductRepositoryInterface;
 use App\Repositories\Interfaces\PromotionRepositoryInterface;
 use App\Repositories\Interfaces\ReviewRepositoryInterface;
+use App\Services\StockService;
 use App\Dtos\RelatedProductData;
-
-
-
+use App\Models\Product;
 
 class ProductService
 {
-    protected $productRepository;
-    protected $cartRepository;
-    protected $relatedProductRepository;
-    protected $promotionRepository;
-    protected $reviewRepository;
-
     public function __construct(
-        ProductRepositoryInterface $productRepository,
-        CartRepositoryInterface $cartRepository,
+        protected ProductRepositoryInterface $productRepository,
+        protected CartRepositoryInterface $cartRepository,
+        protected RelatedProductRepositoryInterface $relatedProductRepository,
+        protected PromotionRepositoryInterface $promotionRepository,
+        protected ReviewRepositoryInterface $reviewRepository,
+        protected StockService $stockService
+    ) {}
 
-        RelatedProductRepositoryInterface $relatedProductRepository,
-        PromotionRepositoryInterface $promotionRepository,
-        ReviewRepositoryInterface $reviewRepository
-    ) {
-        $this->productRepository = $productRepository;
-        $this->cartRepository = $cartRepository;
-
-        $this->relatedProductRepository = $relatedProductRepository;
-        $this->promotionRepository = $promotionRepository;
-        $this->reviewRepository = $reviewRepository;
-    }
-
-    public function listProducts(ProductFilterData $filters, ?string $userId = null): LengthAwarePaginator {
-
+    public function listProducts(ProductFilterData $filters, ?string $userId = null): LengthAwarePaginator 
+    {
         $cartMarking = $userId
-        ? new ProductCartMarkingData(
-            userId: $userId,
-            cartItemProductIds: $this->cartRepository->getCartProductIds($userId)->toArray()
-        ) : null;
+            ? new ProductCartMarkingData(
+                userId: $userId,
+                cartItemProductIds: $this->cartRepository->getCartProductIds($userId)->toArray()
+            ) : null;
 
         $criteria = [
             'search' => $filters->search,
@@ -93,91 +82,106 @@ class ProductService
         return $this->productRepository->find($id);
     }
 
-    public function reserveStock(string $id, int $quantity)
+    // ===== MÉTODOS DE STOCK =====
+
+    /**
+     * Reservar stock para carrito
+     */
+    public function reserveStock(string $productId, int $quantity, ?string $userId = null, ?string $cartId = null): Product
     {
-        return $this->productRepository->reserveStock($id, $quantity);
+        $product = $this->productRepository->find($productId);
+        
+        if (!$product) {
+            throw new \Exception("Producto no encontrado");
+        }
+
+        if (!$product->status) {
+            throw new \Exception("Producto no disponible");
+        }
+
+        // Verificar disponibilidad
+        $availability = $this->stockService->checkAvailability($productId, $quantity);
+        
+        if (!$availability->canFulfillRequest) {
+            throw new \Exception(
+                "Stock insuficiente. Disponible: {$availability->availableStock}, Solicitado: {$quantity}"
+            );
+        }
+
+        // Crear reserva
+        $reservationData = new StockReservationData(
+            productId: $productId,
+            quantity: $quantity,
+            userId: $userId,
+            cartId: $cartId,
+            minutesToExpire: 30 // 30 minutos para reservas de carrito
+        );
+
+        $this->stockService->reserveStock($reservationData);
+
+        return $product;
     }
 
-    public function getProductDetail(string $id): ?Product
+    /**
+     * Verificar disponibilidad de stock
+     */
+    public function checkStockAvailability(string $productId, int $quantity = 1)
     {
-        return $this->productRepository->findByIdWithRelations($id, [
-            'category',
-            'images',
-            'relatedProducts',
-            'blogs' => function ($query) {
-                $query->where('status', true);
-            },
-            'reviews' => function ($query) {
-                $query->where('status', true)
-                    ->orderBy('created_at', 'desc');
-            },
-            'activePromotions'
-        ]);
+        return $this->stockService->checkAvailability($productId, $quantity);
     }
+
+    /**
+     * Liberar stock reservado
+     */
+    public function releaseStock(string $reservationId, string $reason = 'manual')
+    {
+        $reasonEnum = match($reason) {
+            'cart_remove' => \App\Enums\StockMovementReason::CART_REMOVE,
+            'order_cancel' => \App\Enums\StockMovementReason::ORDER_CANCEL,
+            default => \App\Enums\StockMovementReason::MANUAL_ADJUSTMENT
+        };
+
+        return $this->stockService->releaseReservation($reservationId, $reasonEnum);
+    }
+
+    /**
+     * Ajustar stock manualmente
+     */
+    public function adjustStock(string $productId, int $newStock, string $reason = null): bool
+    {
+        return $this->stockService->adjustStock($productId, $newStock, $reason);
+    }
+
+    /**
+     * Obtener productos con stock bajo
+     */
+    public function getLowStockProducts()
+    {
+        return $this->stockService->getLowStockProducts();
+    }
+
+    /**
+     * Obtener reporte de stock de un producto
+     */
+    public function getStockReport(string $productId): array
+    {
+        return $this->stockService->getStockReport($productId);
+    }
+
+    // ===== MÉTODOS EXISTENTES =====
 
     public function createProductRelations(RelatedProductData $data)
     {
         return $this->relatedProductRepository->create($data);
     }
 
-    public function removeRelatedProduct(string $productId, string $relatedProductId): bool
+    public function removeRelatedProduct(string $productId, string $relatedProductId)
     {
         return $this->relatedProductRepository->delete($productId, $relatedProductId);
     }
 
-    public function findRelatedProducts(string $productId, int $limit = 5)
+    public function findRelatedProducts(string $productId)
     {
-        return $this->relatedProductRepository->findSimilarProducts($productId, $limit);
+        return $this->relatedProductRepository->findByProduct($productId);
     }
-
-    public function getProductPriceWithPromotions(string $productId, int $quantity = 1): array
-    {
-        $product = $this->productRepository->findById($productId);
-        $regularPrice = $product->price * $quantity;
-
-        $activePromotions = $this->promotionRepository->findByProduct($productId);
-        if ($activePromotions->isEmpty()) {
-            return [
-                'regular_price' => $regularPrice,
-                'final_price' => $regularPrice,
-                'discount' => 0,
-                'applied_promotion' => null
-            ];
-        }
-
-        $bestPromotion = null;
-        $lowestPrice = $regularPrice;
-
-        foreach ($activePromotions as $promotion) {
-            $priceWithPromotion = $this->calculatePromotionalPrice($product, $promotion, $quantity);
-            if ($priceWithPromotion < $lowestPrice) {
-                $lowestPrice = $priceWithPromotion;
-                $bestPromotion = $promotion;
-            }
-        }
-
-        return [
-            'regular_price' => $regularPrice,
-            'final_price' => $lowestPrice,
-            'discount' => $regularPrice - $lowestPrice,
-            'applied_promotion' => $bestPromotion ? new PromotionResource($bestPromotion) : null
-        ];
-    }
-
-    private function calculatePromotionalPrice(Product $product, Promotion $promotion, int $quantity): float
-    {
-        $pivotData = $promotion->products->find($product->id)->pivot;
-        $discountValue = $pivotData->discount_value ?? $promotion->discount_value;
-
-        if ($quantity < ($pivotData->quantity_required ?? 1)) {
-            return $product->price * $quantity;
-        }
-
-        $discountAmount = $promotion->discount_type === DiscountTypeEnum::PERCENTAGE->value
-            ? ($product->price * $discountValue / 100)
-            : $discountValue;
-
-        return ($product->price - $discountAmount) * $quantity;
-    }
-
 }
