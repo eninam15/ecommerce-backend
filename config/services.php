@@ -35,4 +35,22 @@ return [
         ],
     ],
 
+     'frontend' => [
+        'url' => env('FRONTEND_URL', 'http://localhost:3000'),
+        'order_tracking_url' => env('FRONTEND_URL', 'http://localhost:3000') . '/orders',
+        'payment_url' => env('FRONTEND_URL', 'http://localhost:3000') . '/payments',
+    ],
+
+    'notifications' => [
+        'order_confirmation_delay' => env('ORDER_CONFIRMATION_DELAY', 0), // minutos
+        'order_reminder_delay' => env('ORDER_REMINDER_DELAY', 24 * 60), // minutos (24 horas)
+        'payment_timeout' => env('PAYMENT_TIMEOUT', 30), // minutos
+    ],
+
+    'ppe' => [
+        'base_url' => env('PPE_BASE_URL', 'https://api.ppe.bo'),
+        'token' => env('PPE_TOKEN'),
+        'merchant_id' => env('PPE_MERCHANT_ID'),
+    ],
+
 ];

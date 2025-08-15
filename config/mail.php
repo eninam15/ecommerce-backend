@@ -9,8 +9,9 @@ return [
     |
     | This option controls the default mailer that is used to send all email
     | messages unless another mailer is explicitly specified when sending
-    | the message. All additional mailers can be configured within the
-    | "mailers" array. Examples of each type of mailer are provided.
+    | the message. All additional mailers that may be configured are defined
+    | within the "mailers" array. Examples of each type of mailer may be
+    | found in the Laravel documentation.
     |
     */
 
@@ -23,15 +24,14 @@ return [
     |
     | Here you may configure all of the mailers used by your application plus
     | their respective settings. Several examples have been configured for
-    | you and you are free to add your own as your application requires.
+    | you and you are free to add your own as the application requires.
     |
     | Laravel supports a variety of mail "transport" drivers that can be used
     | when delivering an email. You may specify which one you're using for
-    | your mailers below. You may also add additional mailers if needed.
+    | your mailers below. You may also add additional mailers if required.
     |
     | Supported: "smtp", "sendmail", "mailgun", "ses", "ses-v2",
-    |            "postmark", "resend", "log", "array",
-    |            "failover", "roundrobin"
+    |            "postmark", "resend", "log", "array", "failover", "roundrobin"
     |
     */
 
@@ -39,10 +39,10 @@ return [
 
         'smtp' => [
             'transport' => 'smtp',
-            'scheme' => env('MAIL_SCHEME'),
             'url' => env('MAIL_URL'),
             'host' => env('MAIL_HOST', '127.0.0.1'),
             'port' => env('MAIL_PORT', 2525),
+            'encryption' => env('MAIL_ENCRYPTION', 'tls'),
             'username' => env('MAIL_USERNAME'),
             'password' => env('MAIL_PASSWORD'),
             'timeout' => null,
@@ -110,7 +110,64 @@ return [
 
     'from' => [
         'address' => env('MAIL_FROM_ADDRESS', 'hello@example.com'),
-        'name' => env('MAIL_FROM_NAME', 'Example'),
+        'name' => env('MAIL_FROM_NAME', env('APP_NAME')),
+    ],
+
+    // ===== CONFIGURACIONES ADICIONALES PARA ECOMMERCE =====
+
+    /*
+    |--------------------------------------------------------------------------
+    | Mail Control Settings
+    |--------------------------------------------------------------------------
+    |
+    | These settings allow you to control when emails are actually sent
+    | vs logged/stored for testing purposes.
+    |
+    */
+
+    'enabled' => env('MAIL_ENABLED', true),
+    'send_in_development' => env('MAIL_SEND_IN_DEVELOPMENT', false),
+    'log_all_emails' => env('MAIL_LOG_ALL', true),
+    'test_recipient' => env('MAIL_TEST_RECIPIENT', null),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Email Templates Configuration
+    |--------------------------------------------------------------------------
+    |
+    | Configuration for email templates and branding
+    |
+    */
+
+    'templates' => [
+        'order_confirmation' => [
+            'subject_prefix' => env('MAIL_ORDER_SUBJECT_PREFIX', ''),
+            'enabled' => env('MAIL_ORDER_CONFIRMATION_ENABLED', true),
+        ],
+        'order_status_update' => [
+            'enabled' => env('MAIL_ORDER_STATUS_ENABLED', true),
+        ],
+        'payment_confirmation' => [
+            'enabled' => env('MAIL_PAYMENT_CONFIRMATION_ENABLED', true),
+        ],
+        'welcome_coupon' => [
+            'enabled' => env('MAIL_WELCOME_COUPON_ENABLED', true),
+        ],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Queue Configuration for Emails
+    |--------------------------------------------------------------------------
+    |
+    | Email queue settings to prevent blocking the application
+    |
+    */
+
+    'queue' => [
+        'connection' => env('MAIL_QUEUE_CONNECTION', 'database'),
+        'queue' => env('MAIL_QUEUE_NAME', 'notifications'),
+        'delay' => env('MAIL_QUEUE_DELAY', 0), // seconds
     ],
 
 ];
